@@ -10,11 +10,13 @@ API REST para gerenciamento de catálogo de produtos desenvolvida com Java, Spri
 
 | Versão | Data | Descrição |
 |--------|------|-----------|
+| `1.1.0` | 01/09/2026 | Adicionado suporte a paginação |
 | `1.0.0` | 21/08/2026 | Versão inicial |
 
 ### Funcionalidades incluídas
 
 - CRUD completo de produtos (Criar, Listar, Buscar, Atualizar, Excluir)
+- **Paginação** em todos os endpoints de listagem (page, size, sort)
 - Validações de entrada (nome obrigatório, preço positivo, SKU obrigatório)
 - Tratamento global de exceções com mensagens em português
 - Documentação interativa da API via Swagger UI
@@ -282,13 +284,28 @@ Base URL: `http://localhost:8080/api/products`
 
 | Método | Rota | Descrição | Status Code |
 |--------|------|-----------|-------------|
-| `GET` | `/api/products` | Listar todos os produtos | `200 OK` |
+| `GET` | `/api/products` | Listar todos os produtos (com paginação) | `200 OK` |
 | `GET` | `/api/products/{id}` | Buscar produto por ID | `200 OK` / `404 Not Found` |
-| `GET` | `/api/products/brand/{brandId}` | Listar produtos por marca | `200 OK` / `404 Not Found` |
-| `GET` | `/api/products/category/{categoryId}` | Listar produtos por categoria | `200 OK` / `404 Not Found` |
+| `GET` | `/api/products/brand/{brandId}` | Listar produtos por marca (com paginação) | `200 OK` / `404 Not Found` |
+| `GET` | `/api/products/category/{categoryId}` | Listar produtos por categoria (com paginação) | `200 OK` / `404 Not Found` |
 | `POST` | `/api/products` | Criar um novo produto | `201 Created` / `400 Bad Request` |
 | `PUT` | `/api/products/{id}` | Atualizar produto por ID | `200 OK` / `404 Not Found` |
 | `DELETE` | `/api/products/{id}` | Excluir produto por ID | `204 No Content` / `404 Not Found` |
+
+#### Parâmetros de Paginação (v1.1.0)
+
+| Parâmetro | Tipo | Padrão | Descrição |
+|-----------|------|--------|-----------|
+| `page` | int | 0 | Número da página (começa em 0) |
+| `size` | int | 10 | Quantidade de itens por página |
+| `sort` | string | `id,asc` | Ordenação (campo,direção) |
+
+**Exemplos:**
+```
+GET /api/products?page=0&size=10&sort=name,asc
+GET /api/products/brand/1?page=0&size=5
+GET /api/products/category/1?page=0&size=5
+```
 
 ### Brands (Marcas)
 
