@@ -1,6 +1,8 @@
 package com.catalog.repository;
 
 import com.catalog.entity.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,6 +21,10 @@ import org.springframework.stereotype.Repository;
  *   - existsById(Long id): verifica se um produto existe
  *   - count(): conta o total de produtos
  *
+ * Métodos customizados com paginação:
+ *   - findByBrandId(): busca produtos por marca com paginação
+ *   - findByCategoryId(): busca produtos por categoria com paginação
+ *
  * A anotação @Repository indica que esta interface é um repositório Spring
  * e será tratada como um bean gerenciado pelo container de injeção de dependências.
  */
@@ -29,8 +35,27 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     //   - Product: tipo da entidade gerenciada
     //   - Long: tipo do atributo ID da entidade
 
-    // Nenhum método customizado é necessário para esta aplicação,
-    // pois os métodos padrão do JpaRepository já atendem todas as necessidades.
-    // Exemplo de método customizado (se fosse necessário):
-    // List<Product> findByNameContaining(String name);
+    /**
+     * Busca produtos por ID da marca com paginação.
+     *
+     * O Spring Data JPA gera automaticamente a query baseada no nome do método.
+     * Equivale a: SELECT p FROM Product p WHERE p.brand.id = :brandId
+     *
+     * @param brandId  identificador da marca
+     * @param pageable informações de paginação
+     * @return página de produtos da marca
+     */
+    Page<Product> findByBrandId(Long brandId, Pageable pageable);
+
+    /**
+     * Busca produtos por ID da categoria com paginação.
+     *
+     * O Spring Data JPA gera automaticamente a query baseada no nome do método.
+     * Equivale a: SELECT p FROM Product p WHERE p.category.id = :categoryId
+     *
+     * @param categoryId identificador da categoria
+     * @param pageable   informações de paginação
+     * @return página de produtos da categoria
+     */
+    Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
 }

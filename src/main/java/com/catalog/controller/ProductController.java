@@ -4,11 +4,13 @@ import com.catalog.dto.ProductRequest;
 import com.catalog.dto.ProductResponse;
 import com.catalog.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * Controller REST para gerenciamento de produtos.
@@ -23,6 +25,9 @@ import java.util.List;
  * Endpoints adicionais:
  *   - GET /api/products/brand/{brandId}: listar produtos por marca
  *   - GET /api/products/category/{categoryId}: listar produtos por categoria
+ *
+ * Suporte a paginação:
+ *   - GET /api/products?page=0&size=10&sort=name,asc
  */
 @RestController
 @RequestMapping("/api/products")
@@ -41,15 +46,29 @@ public class ProductController {
     }
 
     /**
-     * Lista todos os produtos cadastrados.
+     * Lista todos os produtos cadastrados com suporte a paginação.
      *
-     * GET /api/products
+     * GET /api/products?page=0&size=10&sort=name,asc
      *
-     * @return ResponseEntity com lista de ProductResponse
+     * @param page número da página (padrão: 0)
+     * @param size tamanho da página (padrão: 10)
+     * @param sort parâmetro de ordenação (padrão: id,asc)
+     * @return ResponseEntity com página de ProductResponse
      */
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> findAll() {
-        return ResponseEntity.ok(productService.findAll());
+    public ResponseEntity<Page<ProductResponse>> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id,asc") String[] sort) {
+
+        String[] sortParts = sort[0].split(",");
+        Sort.Direction direction = sortParts.length > 1 && sortParts[1].equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+        Sort sortObj = Sort.by(direction, sortParts[0]);
+
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+        return ResponseEntity.ok(productService.findAll(pageable));
     }
 
     /**
@@ -66,29 +85,43 @@ public class ProductController {
     }
 
     /**
-     * Lista todos os produtos de uma marca específica.
+     * Lista todos os produtos de uma marca específica com paginação.
      *
-     * GET /api/products/brand/{brandId}
+     * GET /api/products/brand/{brandId}?page=0&size=10
      *
      * @param brandId identificador da marca
-     * @return ResponseEntity com lista de ProductResponse da marca
+     * @param page    número da página (padrão: 0)
+     * @param size    tamanho da página (padrão: 10)
+     * @return ResponseEntity com página de ProductResponse da marca
      */
     @GetMapping("/brand/{brandId}")
-    public ResponseEntity<List<ProductResponse>> findByBrandId(@PathVariable Long brandId) {
-        return ResponseEntity.ok(productService.findByBrandId(brandId));
+    public ResponseEntity<Page<ProductResponse>> findByBrandId(
+            @PathVariable Long brandId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(productService.findByBrandId(brandId, pageable));
     }
 
     /**
-     * Lista todos os produtos de uma categoria específica.
+     * Lista todos os produtos de uma categoria específica com paginação.
      *
-     * GET /api/products/category/{categoryId}
+     * GET /api/products/category/{categoryId}?page=0&size=10
      *
      * @param categoryId identificador da categoria
-     * @return ResponseEntity com lista de ProductResponse da categoria
+     * @param page       número da página (padrão: 0)
+     * @param size       tamanho da página (padrão: 10)
+     * @return ResponseEntity com página de ProductResponse da categoria
      */
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<ProductResponse>> findByCategoryId(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(productService.findByCategoryId(categoryId));
+    public ResponseEntity<Page<ProductResponse>> findByCategoryId(
+            @PathVariable Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(productService.findByCategoryId(categoryId, pageable));
     }
 
     /**

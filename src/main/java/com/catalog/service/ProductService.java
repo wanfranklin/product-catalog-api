@@ -9,9 +9,9 @@ import com.catalog.exception.ResourceNotFoundException;
 import com.catalog.repository.BrandRepository;
 import com.catalog.repository.CategoryRepository;
 import com.catalog.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Serviço de negócio para gerenciamento de produtos.
@@ -21,13 +21,13 @@ import java.util.List;
  * e o Repository (camada de persistência).
  *
  * Responsabilidades:
- *   - Listar todos os produtos cadastrados
+ *   - Listar todos os produtos cadastrados (com paginação)
  *   - Buscar um produto específico por ID
  *   - Criar um novo produto (com validação de marca e categoria)
  *   - Atualizar os dados de um produto existente
  *   - Excluir um produto do catálogo
- *   - Buscar produtos por marca
- *   - Buscar produtos por categoria
+ *   - Buscar produtos por marca (com paginação)
+ *   - Buscar produtos por categoria (com paginação)
  *
  * A anotação @Service indica que esta classe é um serviço Spring,
  * permitindo a injeção de dependências e o gerenciamento pelo container.
@@ -58,14 +58,14 @@ public class ProductService {
     }
 
     /**
-     * Lista todos os produtos cadastrados no catálogo.
+     * Lista todos os produtos cadastrados no catálogo com paginação.
      *
-     * @return lista de todos os produtos convertidos para ProductResponse
+     * @param pageable informações de paginação (página, tamanho, ordenação)
+     * @return página de produtos convertidos para ProductResponse
      */
-    public List<ProductResponse> findAll() {
-        return productRepository.findAll().stream()
-                .map(ProductResponse::fromEntity)
-                .toList();
+    public Page<ProductResponse> findAll(Pageable pageable) {
+        return productRepository.findAll(pageable)
+                .map(ProductResponse::fromEntity);
     }
 
     /**
@@ -82,39 +82,37 @@ public class ProductService {
     }
 
     /**
-     * Lista todos os produtos de uma marca específica.
+     * Lista todos os produtos de uma marca específica com paginação.
      *
-     * @param brandId identificador da marca
-     * @return lista de produtos da marca convertidos para ProductResponse
+     * @param brandId  identificador da marca
+     * @param pageable informações de paginação
+     * @return página de produtos da marca convertidos para ProductResponse
      * @throws ResourceNotFoundException se a marca não existir no banco
      */
-    public List<ProductResponse> findByBrandId(Long brandId) {
+    public Page<ProductResponse> findByBrandId(Long brandId, Pageable pageable) {
         // Verifica se a marca existe
         if (!brandRepository.existsById(brandId)) {
             throw new ResourceNotFoundException("Marca não encontrada com id: " + brandId);
         }
-        return productRepository.findAll().stream()
-                .filter(p -> p.getBrand().getId().equals(brandId))
-                .map(ProductResponse::fromEntity)
-                .toList();
+        return productRepository.findByBrandId(brandId, pageable)
+                .map(ProductResponse::fromEntity);
     }
 
     /**
-     * Lista todos os produtos de uma categoria específica.
+     * Lista todos os produtos de uma categoria específica com paginação.
      *
      * @param categoryId identificador da categoria
-     * @return lista de produtos da categoria convertidos para ProductResponse
+     * @param pageable   informações de paginação
+     * @return página de produtos da categoria convertidos para ProductResponse
      * @throws ResourceNotFoundException se a categoria não existir no banco
      */
-    public List<ProductResponse> findByCategoryId(Long categoryId) {
+    public Page<ProductResponse> findByCategoryId(Long categoryId, Pageable pageable) {
         // Verifica se a categoria existe
         if (!categoryRepository.existsById(categoryId)) {
             throw new ResourceNotFoundException("Categoria não encontrada com id: " + categoryId);
         }
-        return productRepository.findAll().stream()
-                .filter(p -> p.getCategory().getId().equals(categoryId))
-                .map(ProductResponse::fromEntity)
-                .toList();
+        return productRepository.findByCategoryId(categoryId, pageable)
+                .map(ProductResponse::fromEntity);
     }
 
     /**
