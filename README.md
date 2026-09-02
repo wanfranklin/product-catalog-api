@@ -6,6 +6,8 @@ API REST para gerenciamento de catálogo de produtos desenvolvida com Java, Spri
 
 ---
 
+> Badge YOLO: Merge sem review
+
 ## Versão
 
 | Versão | Data | Descrição |
