@@ -696,7 +696,7 @@ O projeto segue o padrao **Controller -> Service -> Repository -> Entity**:
 
 ---
 
-## Documentacao do Codigo
+## Documentação do Código
 
 **Este projeto e totalmente comentado em portugues.** Todos os arquivos Java possuem:
 
